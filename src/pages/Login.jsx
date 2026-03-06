@@ -9,8 +9,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    email: "",
-    password: "",
+    email: "futurekgomotso@gmail.com",
+    password: 12345,
   });
 
   const submit = async (e) => {
