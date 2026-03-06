@@ -1,26 +1,62 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Menu from "./pages/Menu";
-import Checkout from "./pages/Checkout";
-import OrderStatus from "./pages/OrderStatus";
-import Success from "./pages/Success";
-import { OrderProvider } from "./context/OrderContext";
-import ErrorBoundary from "./components/ErrorBoundary";
+
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Orders from "./pages/Orders";
+import MenuManager from "./pages/MenuManager";
+import Analytics from "./pages/Analytics";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
+
   return (
-    <ErrorBoundary>
-      <OrderProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order/:id" element={<OrderStatus />} />
-            <Route path="/success" element={<Success />} />
-          </Routes>
-        </BrowserRouter>
-      </OrderProvider>
-    </ErrorBoundary>
+
+    <BrowserRouter>
+
+      <Routes>
+
+        <Route path="/login" element={<Login />} />
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoute>
+              <MenuManager />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+
+    </BrowserRouter>
+
   );
 }
