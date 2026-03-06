@@ -21,9 +21,9 @@ export default function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            
               <Dashboard />
-            </ProtectedRoute>
+            
           }
         />
 
@@ -39,9 +39,9 @@ export default function App() {
         <Route
           path="/menu"
           element={
-            <ProtectedRoute>
+            
               <MenuManager />
-            </ProtectedRoute>
+            
           }
         />
 
