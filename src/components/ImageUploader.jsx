@@ -2,30 +2,31 @@ import { useState } from "react";
 
 export default function ImageUploader({ onUpload }) {
 
-  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
 
-  const handleUpload = () => {
+  const handleChange = (e) => {
 
-    const form = new FormData();
+    const file = e.target.files[0];
 
-    form.append("image", file);
+    if (!file) return;
 
-    onUpload(form);
+    setPreview(URL.createObjectURL(file));
+
+    onUpload(file);
   };
 
   return (
     <div>
 
-      <input
-        type="file"
-        onChange={(e) =>
-          setFile(e.target.files[0])
-        }
-      />
+      <input type="file" onChange={handleChange} />
 
-      <button onClick={handleUpload}>
-        Upload
-      </button>
+      {preview && (
+        <img
+          src={preview}
+          alt="preview"
+          className="mt-3 h-32 rounded"
+        />
+      )}
 
     </div>
   );
