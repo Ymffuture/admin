@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "https://kotabites.onrender.com";
+const API = "https://kotabites.onrender.com/api";
 
 export const getMenu = () =>
   axios.get(`${API}/menu`);
