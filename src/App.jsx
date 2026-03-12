@@ -17,33 +17,33 @@ export default function App() {
         <Route
           path="/"
           element={
-            
+            <ProtectedRoute>
               <Dashboard />
-            
+            </ProtectedRoute>
           }
         />
         <Route
           path="/orders"
           element={
-            
+            <ProtectedRoute>
               <Orders />
-            
+            </ProtectedRoute>
           }
         />
         <Route
           path="/menu"
           element={
-            
+            <ProtectedRoute>
               <MenuManager />
-            
+            </ProtectedRoute>
           }
         />
         <Route
           path="/analytics"
           element={
-            
+            <ProtectedRoute>
               <Analytics />
-            
+            </ProtectedRoute>
           }
         />
       </Routes>
