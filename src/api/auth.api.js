@@ -1,40 +1,44 @@
-// src/api/authApi.js
-
 import axios from "axios";
 
 const API = "https://kotabites.onrender.com";
 
-// Create axios instance (recommended)
-const api = axios.create({
+// Shared instance — all requests go through here
+export const api = axios.create({
   baseURL: API,
-  timeout: 10000,
+  timeout: 15000,
 });
 
-// Optional: Auto-attach token for protected routes later
+// Auto-attach token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-export const loginAdmin = (data) => 
-  api.post("/auth/login", data);
+// BUG FIX 1: Backend uses OAuth2PasswordRequestForm
+// → must send application/x-www-form-urlencoded with field "username" (not "email")
+export const loginAdmin = async ({ email, password }) => {
+  const params = new URLSearchParams();
+  params.append("username", email); // OAuth2 spec requires "username"
+  params.append("password", password);
 
-// Bonus functions (recommended to add now)
-export const registerUser = (data) => 
-  api.post("/auth/register", data);
+  const res = await api.post("/auth/login", params, {
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
+
+  // BUG FIX 2: Save token under "token" key so interceptor picks it up
+  if (res.data?.access_token) {
+    localStorage.setItem("token", res.data.access_token);
+  }
+
+  return res;
+};
+
+export const registerUser = (data) => api.post("/auth/register", data);
 
 export const logout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("adminUser");
 };
 
-// Example usage with token saving
-export const loginAndSaveToken = async (data) => {
-  const response = await loginAdmin(data);
-  const token = response.data.access_token;
-  
-  localStorage.setItem("token", token);
-  return response.data;
-};
+export default api;
