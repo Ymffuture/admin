@@ -2,46 +2,90 @@ import { useEffect, useState, useCallback } from "react";
 import { getOrders, updateOrderStatus } from "../api/orders.api";
 import OrderTable from "../components/OrderTable";
 
-// Custom Icons
+// Professional Admin Icons (Lucide-style) - FIXED SVG ATTRIBUTES
 const Icons = {
-  Refresh: ({ className, spinning }) => (
-    <svg className={`${className} ${spinning ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  LayoutDashboard: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
     </svg>
   ),
-  Orders: ({ className }) => (
+  ShoppingBag: ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 01-8 0" />
     </svg>
   ),
-  Warning: ({ className }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  RefreshCw: ({ className, spin }) => (
+    <svg className={`${className} ${spin ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
     </svg>
   ),
-  Check: ({ className }) => (
+  TrendingUp: ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M5 13l4 4L19 7" />
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
     </svg>
   ),
-  Trending: ({ className }) => (
+  DollarSign: ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+    </svg>
+  ),
+  Users: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
     </svg>
   ),
   Clock: ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   ),
-  Package: ({ className }) => (
+  AlertCircle: ({ className }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+  CheckCircle: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  ),
+  MoreHorizontal: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="19" cy="12" r="1" />
+      <circle cx="5" cy="12" r="1" />
+    </svg>
+  ),
+  Download: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  ),
+  Printer: ({ className }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
     </svg>
   )
 };
 
-// Toast Component
+// Toast Notification System
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 4000);
@@ -50,99 +94,140 @@ const Toast = ({ message, type, onClose }) => {
 
   const styles = {
     success: "bg-emerald-500",
-    error: "bg-red-500",
+    error: "bg-rose-500",
+    warning: "bg-amber-500",
     info: "bg-blue-500"
+  };
+
+  const icons = {
+    success: <Icons.CheckCircle className="w-5 h-5" />,
+    error: <Icons.AlertCircle className="w-5 h-5" />,
+    warning: <Icons.AlertCircle className="w-5 h-5" />,
+    info: <Icons.AlertCircle className="w-5 h-5" />
   };
 
   return (
     <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl text-white transform transition-all duration-500 animate-slide-in ${styles[type]}`}>
-      {type === 'success' ? <Icons.Check className="w-5 h-5" /> : <Icons.Warning className="w-5 h-5" />}
+      {icons[type]}
       <p className="font-semibold text-sm">{message}</p>
-      <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">×</button>
+      <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100 transition">×</button>
     </div>
   );
 };
 
-// Stat Card Component
-const StatCard = ({ label, value, trend, trendUp, icon: Icon, color }) => (
-  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group">
-    <div className="flex items-center justify-between mb-4">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
-        <Icon className={`w-6 h-6 ${color.replace('bg-', 'text-')}`} />
+// Metric Card Component
+const MetricCard = ({ title, value, change, changeType, icon: Icon, trend }) => (
+  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all duration-300 group">
+    <div className="flex items-start justify-between">
+      <div className={`p-3 rounded-lg bg-opacity-10 ${trend === 'up' ? 'bg-emerald-500 text-emerald-600' : trend === 'down' ? 'bg-rose-500 text-rose-600' : 'bg-blue-500 text-blue-600'}`}>
+        <Icon className="w-6 h-6" />
       </div>
-      {trend !== undefined && (
-        <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-          {trendUp ? '↑' : '↓'} {Math.abs(trend)}%
+      {change && (
+        <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${changeType === 'positive' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+          {changeType === 'positive' ? '↑' : '↓'} {change}
         </span>
       )}
     </div>
-    <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
-    <p className="text-sm text-gray-500">{label}</p>
+    <div className="mt-4">
+      <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{title}</p>
+    </div>
   </div>
 );
 
-// Status Badge Component
-const StatusBadge = ({ status }) => {
-  const styles = {
-    pending: "bg-amber-100 text-amber-700 border-amber-200",
-    preparing: "bg-blue-100 text-blue-700 border-blue-200",
-    ready: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    delivered: "bg-gray-100 text-gray-700 border-gray-200",
-    cancelled: "bg-red-100 text-red-700 border-red-200"
+// Quick Action Button
+const QuickAction = ({ icon: Icon, label, onClick, variant = 'default' }) => {
+  const variants = {
+    default: "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700",
+    primary: "bg-blue-600 border-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30",
+    danger: "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100"
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${styles[status] || styles.pending}`}>
-      {status}
-    </span>
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all duration-200 ${variants[variant]}`}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </button>
   );
 };
 
-// Empty State Component
-const EmptyState = ({ onAction }) => (
-  <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-      <Icons.Package className="w-10 h-10 text-gray-400" />
-    </div>
-    <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-    <p className="text-gray-500 text-center max-w-sm mb-6">Orders will appear here when customers start placing them.</p>
-    <button onClick={onAction} className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition flex items-center gap-2">
-      <Icons.Refresh className="w-4 h-4" />
-      Check for Orders
-    </button>
-  </div>
-);
+// Status Overview Bar
+const StatusOverview = ({ orders }) => {
+  const statuses = [
+    { key: 'pending', label: 'Pending', color: 'bg-amber-500', text: 'text-amber-700' },
+    { key: 'preparing', label: 'Preparing', color: 'bg-blue-500', text: 'text-blue-700' },
+    { key: 'ready', label: 'Ready', color: 'bg-purple-500', text: 'text-purple-700' },
+    { key: 'delivered', label: 'Delivered', color: 'bg-emerald-500', text: 'text-emerald-700' }
+  ];
 
-// Error State Component
-const ErrorState = ({ error, onRetry }) => (
-  <div className="flex flex-col items-center justify-center py-16 bg-red-50 rounded-2xl border border-red-100">
-    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-      <Icons.Warning className="w-8 h-8 text-red-500" />
-    </div>
-    <h3 className="text-lg font-semibold text-red-900 mb-2">Something went wrong</h3>
-    <p className="text-red-600 text-center max-w-md mb-6 text-sm">{error}</p>
-    <button onClick={onRetry} className="px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition flex items-center gap-2">
-      <Icons.Refresh className="w-4 h-4" />
-      Try Again
-    </button>
-  </div>
-);
+  const counts = statuses.map(s => ({
+    ...s,
+    count: orders.filter(o => o.status === s.key).length
+  }));
 
-// Skeleton Loader
-const TableSkeleton = () => (
-  <div className="space-y-4">
-    {[...Array(5)].map((_, i) => (
-      <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-lg" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-1/4" />
-            <div className="h-3 bg-gray-200 rounded w-1/3" />
+  const total = orders.length;
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+      <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Order Status Overview</h3>
+      <div className="flex items-center gap-4">
+        {counts.map(({ key, label, color, text, count }) => (
+          <div key={key} className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</span>
+              <span className={`text-sm font-bold ${text}`}>{count}</span>
+            </div>
+            <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div 
+                className={`h-full ${color} rounded-full transition-all duration-500`}
+                style={{ width: total > 0 ? `${(count / total) * 100}%` : '0%' }}
+              />
+            </div>
           </div>
-          <div className="w-24 h-8 bg-gray-200 rounded-full" />
-        </div>
+        ))}
       </div>
-    ))}
+    </div>
+  );
+};
+
+// Loading Skeleton
+const DashboardSkeleton = () => (
+  <div className="space-y-6 animate-pulse">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-6 h-32 border border-slate-200 dark:border-slate-700" />
+      ))}
+    </div>
+    <div className="bg-white dark:bg-slate-800 rounded-xl h-64 border border-slate-200 dark:border-slate-700" />
+  </div>
+);
+
+// Empty State
+const EmptyState = ({ onRefresh }) => (
+  <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 border-dashed">
+    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+      <Icons.ShoppingBag className="w-8 h-8 text-slate-400" />
+    </div>
+    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No orders yet</h3>
+    <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-6">
+      Orders will appear here once customers start placing them through your menu.
+    </p>
+    <QuickAction icon={Icons.RefreshCw} label="Refresh" onClick={onRefresh} />
+  </div>
+);
+
+// Error State
+const ErrorState = ({ error, onRetry }) => (
+  <div className="flex flex-col items-center justify-center py-16 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+    <div className="w-16 h-16 bg-rose-100 dark:bg-rose-800 rounded-full flex items-center justify-center mb-4">
+      <Icons.AlertCircle className="w-8 h-8 text-rose-600 dark:text-rose-400" />
+    </div>
+    <h3 className="text-lg font-semibold text-rose-900 dark:text-rose-200 mb-2">Failed to load orders</h3>
+    <p className="text-rose-600 dark:text-rose-400 text-center max-w-md mb-6 text-sm">{error}</p>
+    <QuickAction icon={Icons.RefreshCw} label="Try Again" onClick={onRetry} variant="danger" />
   </div>
 );
 
@@ -151,9 +236,9 @@ export default function Orders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const showToast = useCallback((message, type) => {
+  const showToast = useCallback((message, type = "success") => {
     setToast({ message, type, id: Date.now() });
   }, []);
 
@@ -164,13 +249,15 @@ export default function Orders() {
       const res = await getOrders();
       const data = Array.isArray(res.data) ? res.data : [];
       setOrders(data);
+      setLastUpdated(new Date());
     } catch (err) {
       const msg = err.response?.data?.detail || err.message || "Unknown error";
       const status = err.response?.status;
+      
       if (status === 401) {
-        setError("Session expired — please log in again.");
+        setError("Session expired. Please log in again.");
       } else if (status === 404) {
-        setError("Orders service unavailable. Please try again later.");
+        setError("Orders service unavailable. Please check your connection.");
       } else {
         setError(`Failed to load orders: ${msg}`);
       }
@@ -181,8 +268,15 @@ export default function Orders() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading && !error) load();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loading, error, load]);
+
   const changeStatus = async (id, status) => {
-    setUpdatingId(id);
     try {
       await updateOrderStatus(id, status);
       setOrders(prev => prev.map(o => (o.id === id ? { ...o, status } : o)));
@@ -190,113 +284,128 @@ export default function Orders() {
     } catch (err) {
       const msg = err.response?.data?.detail || err.message;
       showToast(`Update failed: ${msg}`, "error");
-    } finally {
-      setUpdatingId(null);
     }
   };
 
-  // Calculate stats
-  const stats = {
+  // Calculate metrics
+  const metrics = {
     total: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    preparing: orders.filter(o => o.status === 'preparing').length,
-    revenue: orders.reduce((sum, o) => sum + (o.total || 0), 0).toFixed(2)
+    revenue: orders.reduce((sum, o) => sum + (o.total_amount || 0), 0),
+    today: orders.filter(o => {
+      const orderDate = new Date(o.created_at);
+      const today = new Date();
+      return orderDate.toDateString() === today.toDateString();
+    }).length,
+    pending: orders.filter(o => o.status === 'pending').length
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 lg:p-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-6 lg:p-8">
       {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="max-w-7xl mx-auto">
-        {/* Smart Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                <Icons.Orders className="w-6 h-6" />
+            <div className="flex items-center gap-3 mb-1">
+              <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/30">
+                <Icons.LayoutDashboard className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Orders</h1>
-                <p className="text-gray-500 text-sm">Manage and track customer orders</p>
-              </div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Orders</h1>
             </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm ml-1">
+              Manage and track customer orders in real-time
+              {lastUpdated && ` · Updated ${lastUpdated.toLocaleTimeString()}`}
+            </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button 
-              onClick={load} 
-              disabled={loading}
-              className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 transition flex items-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              <Icons.Refresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+            <QuickAction 
+              icon={Icons.Download} 
+              label="Export" 
+              onClick={() => showToast("Export feature coming soon", "info")}
+            />
+            <QuickAction 
+              icon={Icons.Printer} 
+              label="Print" 
+              onClick={() => showToast("Print feature coming soon", "info")}
+            />
+            <QuickAction 
+              icon={Icons.RefreshCw} 
+              label={loading ? "Refreshing..." : "Refresh"} 
+              onClick={load}
+              variant="primary"
+            />
           </div>
         </div>
-
-        {/* Stats Dashboard */}
-        {!loading && !error && orders.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard 
-              label="Total Orders" 
-              value={stats.total} 
-              icon={Icons.Orders} 
-              color="bg-blue-500"
-              trend={12} 
-              trendUp={true}
-            />
-            <StatCard 
-              label="Pending" 
-              value={stats.pending} 
-              icon={Icons.Clock} 
-              color="bg-amber-500"
-            />
-            <StatCard 
-              label="Preparing" 
-              value={stats.preparing} 
-              icon={Icons.Package} 
-              color="bg-indigo-500"
-            />
-            <StatCard 
-              label="Revenue" 
-              value={`R${stats.revenue}`} 
-              icon={Icons.Trending} 
-              color="bg-emerald-500"
-              trend={8}
-              trendUp={true}
-            />
-          </div>
-        )}
 
         {/* Error State */}
         {error && <ErrorState error={error} onRetry={load} />}
 
         {/* Loading State */}
-        {loading && <TableSkeleton />}
+        {loading && !error && <DashboardSkeleton />}
 
-        {/* Empty State */}
-        {!loading && !error && orders.length === 0 && <EmptyState onAction={load} />}
-
-        {/* Orders Table */}
-        {!loading && !error && orders.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Live updates</span>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-              </div>
+        {/* Content */}
+        {!loading && !error && (
+          <>
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <MetricCard 
+                title="Total Orders" 
+                value={metrics.total} 
+                change="12%" 
+                changeType="positive"
+                icon={Icons.ShoppingBag}
+                trend="up"
+              />
+              <MetricCard 
+                title="Today's Orders" 
+                value={metrics.today} 
+                change="5%" 
+                changeType="positive"
+                icon={Icons.Clock}
+                trend="up"
+              />
+              <MetricCard 
+                title="Revenue" 
+                value={`R${metrics.revenue.toFixed(2)}`} 
+                change="8%" 
+                changeType="positive"
+                icon={Icons.DollarSign}
+                trend="up"
+              />
+              <MetricCard 
+                title="Pending" 
+                value={metrics.pending} 
+                change={metrics.pending > 5 ? "High" : "Normal"}
+                changeType={metrics.pending > 5 ? 'negative' : 'positive'}
+                icon={Icons.Users}
+                trend={metrics.pending > 5 ? 'down' : 'up'}
+              />
             </div>
-            
-            <OrderTable 
-              orders={orders} 
-              onStatusChange={changeStatus}
-              updatingId={updatingId}
-            />
-          </div>
+
+            {/* Status Overview */}
+            <StatusOverview orders={orders} />
+
+            {/* Orders Table or Empty State */}
+            {orders.length === 0 ? (
+              <EmptyState onRefresh={load} />
+            ) : (
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Orders</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400">Live updates</span>
+                  </div>
+                </div>
+                <OrderTable orders={orders} onStatusChange={changeStatus} />
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -308,12 +417,12 @@ export default function Orders() {
         .animate-slide-in {
           animation: slide-in 0.4s ease-out;
         }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+          animation: spin 1s linear infinite;
         }
       `}</style>
     </div>
