@@ -1,161 +1,237 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import useAdminAuth from "../hooks/useAdminAuth";
-import { useNavigate } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  ClipboardList, 
-  UtensilsCrossed, 
-  BarChart3, 
-  LogOut, 
-  ChevronRight,
-  Sparkles
+import { getOrders } from "../api/orders.api";
+import { getMenu } from "../api/menu.api";
+import { getPendingDrivers } from "../api/drivers.api";
+import {
+  ClipboardList, UtensilsCrossed, BarChart3, Bike,
+  TrendingUp, ShoppingBag, DollarSign, Clock, AlertCircle,
+  ChevronRight, RefreshCw, CheckCircle2, XCircle, ChefHat,
 } from "lucide-react";
 
-export default function Dashboard() {
-  const { user, logout } = useAdminAuth();
-  const navigate = useNavigate();
+const STATUS_COLOR = {
+  pending:   "text-amber-400",
+  paid:      "text-blue-400",
+  preparing: "text-orange-400",
+  ready:     "text-purple-400",
+  delivered: "text-emerald-400",
+  cancelled: "text-rose-400",
+};
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+const STATUS_BG = {
+  pending:   "bg-amber-500/10 border-amber-500/20",
+  paid:      "bg-blue-500/10 border-blue-500/20",
+  preparing: "bg-orange-500/10 border-orange-500/20",
+  ready:     "bg-purple-500/10 border-purple-500/20",
+  delivered: "bg-emerald-500/10 border-emerald-500/20",
+  cancelled: "bg-rose-500/10 border-rose-500/20",
+};
+
+function StatCard({ label, value, sub, icon: Icon, color, loading }) {
+  return (
+    <div className={`relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/10 p-6 hover:border-white/20 transition-all duration-300`}>
+      <div className={`inline-flex p-3 rounded-xl mb-4 ${color}`}>
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      {loading ? (
+        <div className="space-y-2">
+          <div className="h-8 w-24 bg-white/10 rounded-lg animate-pulse" />
+          <div className="h-4 w-32 bg-white/5 rounded animate-pulse" />
+        </div>
+      ) : (
+        <>
+          <p className="text-3xl font-bold text-white mb-1">{value}</p>
+          <p className="text-sm text-slate-500">{sub || label}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function RecentOrderRow({ order }) {
+  const statusCfg = {
+    pending:   { label: "Pending",   Icon: Clock,         cls: STATUS_BG.pending },
+    paid:      { label: "Paid",      Icon: CheckCircle2,  cls: STATUS_BG.paid },
+    preparing: { label: "Preparing", Icon: ChefHat,       cls: STATUS_BG.preparing },
+    ready:     { label: "Ready",     Icon: ShoppingBag,   cls: STATUS_BG.ready },
+    delivered: { label: "Delivered", Icon: CheckCircle2,  cls: STATUS_BG.delivered },
+    cancelled: { label: "Cancelled", Icon: XCircle,       cls: STATUS_BG.cancelled },
+  };
+  const cfg = statusCfg[order.status] || statusCfg.pending;
+  const Icon = cfg.Icon;
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+          <ShoppingBag className="w-4 h-4 text-slate-400" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-white">#{String(order.id).slice(-8).toUpperCase()}</p>
+          <p className="text-xs text-slate-500">{order.items?.length || 0} items · R{order.total_amount?.toFixed(2)}</p>
+        </div>
+      </div>
+      <span className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border ${cfg.cls} ${STATUS_COLOR[order.status]}`}>
+        <Icon className="w-3 h-3" />
+        {cfg.label}
+      </span>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const [orders, setOrders]       = useState([]);
+  const [menu, setMenu]           = useState([]);
+  const [pendingDrivers, setPending] = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [ordRes, menuRes, drvRes] = await Promise.allSettled([
+        getOrders(),
+        getMenu(),
+        getPendingDrivers(),
+      ]);
+      if (ordRes.status === "fulfilled") setOrders(Array.isArray(ordRes.value.data) ? ordRes.value.data : []);
+      if (menuRes.status === "fulfilled") setMenu(Array.isArray(menuRes.value.data) ? menuRes.value.data : []);
+      if (drvRes.status === "fulfilled") setPending(Array.isArray(drvRes.value.data) ? drvRes.value.data : []);
+    } catch {
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const menuItems = [
-    {
-      to: "/orders",
-      icon: ClipboardList,
-      title: "Orders",
-      description: "View and manage customer orders",
-      gradient: "from-amber-500 to-orange-600",
-      bgGlow: "group-hover:shadow-amber-500/20"
-    },
-    {
-      to: "/menu",
-      icon: UtensilsCrossed,
-      title: "Menu",
-      description: "Add, edit and delete menu items",
-      gradient: "from-emerald-500 to-teal-600",
-      bgGlow: "group-hover:shadow-emerald-500/20"
-    },
-    {
-      to: "/analytics",
-      icon: BarChart3,
-      title: "Analytics",
-      description: "Sales and order trends",
-      gradient: "from-violet-500 to-purple-600",
-      bgGlow: "group-hover:shadow-violet-500/20"
-    }
-  ];
+  useEffect(() => { load(); }, []);
+
+  const today = new Date().toDateString();
+  const todayOrders = orders.filter(o => o.created_at && new Date(o.created_at).toDateString() === today);
+  const revenue = orders.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const todayRevenue = todayOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const pendingCount = orders.filter(o => o.status === "pending").length;
+  const recentOrders = [...orders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+
+  const statusBreakdown = ["pending","paid","preparing","ready","delivered","cancelled"].map(s => ({
+    status: s, count: orders.filter(o => o.status === s).length,
+  }));
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-slate-200 selection:bg-indigo-500/30">
-      {/* Ambient Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-indigo-600/10 via-transparent to-purple-600/10 blur-3xl" />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-3xl" />
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-slate-500 text-sm mt-1">Live overview — {new Date().toLocaleDateString("en-ZA", { weekday:"long", day:"numeric", month:"long" })}</p>
+        </div>
+        <button onClick={load} disabled={loading} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm text-slate-300 transition disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      {/* TOP NAV - Glassmorphism */}
-      <nav className="relative z-10 backdrop-blur-xl bg-white/5 border-b border-white/10 px-6 py-4 flex items-center justify-between sticky top-0">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 blur-lg opacity-50" />
-            <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-xl">
-              <Sparkles className="w-5 h-5 text-white" />
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Total Orders"   value={orders.length}          sub={`${todayOrders.length} today`}            icon={ClipboardList}   color="bg-gradient-to-br from-blue-500 to-indigo-600"    loading={loading} />
+        <StatCard label="Total Revenue"  value={`R${revenue.toFixed(0)}`} sub={`R${todayRevenue.toFixed(0)} today`}   icon={DollarSign}      color="bg-gradient-to-br from-emerald-500 to-teal-600"   loading={loading} />
+        <StatCard label="Menu Items"     value={menu.length}             sub={`${[...new Set(menu.map(m=>m.category))].length} categories`} icon={UtensilsCrossed} color="bg-gradient-to-br from-amber-500 to-orange-600" loading={loading} />
+        <StatCard label="Pending Drivers" value={pendingDrivers.length}  sub="Awaiting approval"                       icon={Bike}            color="bg-gradient-to-br from-violet-500 to-purple-600"  loading={loading} />
+      </div>
+
+      {/* Status breakdown + Recent orders */}
+      <div className="grid lg:grid-cols-3 gap-6">
+
+        {/* Status Breakdown */}
+        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 space-y-4">
+          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Order Statuses</h2>
+          {statusBreakdown.map(({ status, count }) => (
+            <div key={status} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className={`capitalize font-medium ${STATUS_COLOR[status]}`}>{status}</span>
+                <span className="text-slate-400 font-mono">{count}</span>
+              </div>
+              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${
+                    status === "delivered" ? "bg-emerald-500" :
+                    status === "pending"   ? "bg-amber-500"  :
+                    status === "cancelled" ? "bg-rose-500"   :
+                    status === "preparing" ? "bg-orange-500" :
+                    status === "ready"     ? "bg-purple-500" :
+                    "bg-blue-500"
+                  }`}
+                  style={{ width: orders.length ? `${(count / orders.length) * 100}%` : "0%" }}
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              KotaBites
-            </h1>
-            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Admin Portal</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-slate-400">{user?.email}</span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-sm font-medium"
-          >
-            <LogOut className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="relative z-10 p-6 lg:p-12 max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-12 space-y-2">
-          <div className="flex items-center gap-2 text-indigo-400 text-sm font-medium mb-2">
-            <LayoutDashboard className="w-4 h-4" />
-            <span className="uppercase tracking-wider">Overview</span>
-          </div>
-          <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            Dashboard
-          </h2>
-          <p className="text-slate-400 text-lg max-w-xl">
-            Welcome back. Manage your store operations with intelligent insights.
-          </p>
-        </div>
-
-        {/* Cards Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {menuItems.map((item, index) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`group relative overflow-hidden rounded-2xl bg-white/[0.03] border border-white/10 p-8 hover:bg-white/[0.05] transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${item.bgGlow}`}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Hover Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Icon Container */}
-              <div className={`relative mb-6 inline-flex p-4 rounded-2xl bg-gradient-to-br ${item.gradient} shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-500`}>
-                <item.icon className="w-7 h-7 text-white" />
-              </div>
-
-              {/* Content */}
-              <div className="relative space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all duration-300">
-                    {item.title}
-                  </h3>
-                  <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-                <p className="text-slate-400 text-sm leading-relaxed group-hover:text-slate-300 transition-colors">
-                  {item.description}
-                </p>
-              </div>
-
-              {/* Bottom Accent Line */}
-              <div className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${item.gradient} w-0 group-hover:w-full transition-all duration-500 ease-out`} />
+          ))}
+          {pendingCount > 0 && (
+            <Link to="/orders" className="flex items-center justify-between pt-2 text-sm text-amber-400 hover:text-amber-300 transition">
+              <span>{pendingCount} orders need attention</span>
+              <ChevronRight className="w-4 h-4" />
             </Link>
-          ))}
+          )}
         </div>
 
-        {/* Stats Preview (Optional Enhancement) */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Today's Orders", value: "24", change: "+12%" },
-            { label: "Revenue", value: "R2.4k", change: "+8%" },
-            { label: "Active Items", value: "18", change: "+2" },
-            { label: "Avg. Rating", value: "4.8", change: "+0.2" }
-          ].map((stat, i) => (
-            <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-colors">
-              <p className="text-slate-500 text-xs uppercase tracking-wider mb-1">{stat.label}</p>
-              <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-white">{stat.value}</span>
-                <span className="text-emerald-400 text-xs mb-1">{stat.change}</span>
-              </div>
+        {/* Recent Orders */}
+        <div className="lg:col-span-2 bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Recent Orders</h2>
+            <Link to="/orders" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition">
+              View all <ChevronRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex justify-between items-center py-3 border-b border-white/5">
+                  <div className="flex gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white/5 animate-pulse" />
+                    <div className="space-y-1.5">
+                      <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
+                      <div className="h-2.5 w-16 bg-white/5 rounded animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="h-6 w-20 bg-white/5 rounded-full animate-pulse" />
+                </div>
+              ))}
             </div>
-          ))}
+          ) : recentOrders.length === 0 ? (
+            <p className="text-slate-500 text-sm text-center py-8">No orders yet</p>
+          ) : (
+            recentOrders.map(o => <RecentOrderRow key={o.id} order={o} />)
+          )}
         </div>
+      </div>
+
+      {/* Quick nav cards */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { to:"/orders",    Icon:ClipboardList,   title:"Manage Orders",   sub:"Update statuses",      grad:"from-blue-500/20 to-indigo-500/20",   border:"border-blue-500/20"   },
+          { to:"/menu",      Icon:UtensilsCrossed, title:"Edit Menu",        sub:"Add or remove items",  grad:"from-emerald-500/20 to-teal-500/20",  border:"border-emerald-500/20" },
+          { to:"/drivers",   Icon:Bike,            title:"Approve Drivers",  sub:`${pendingDrivers.length} pending`, grad:"from-violet-500/20 to-purple-500/20", border:"border-violet-500/20" },
+          { to:"/analytics", Icon:BarChart3,       title:"Analytics",        sub:"Chat & sales data",    grad:"from-amber-500/20 to-orange-500/20",  border:"border-amber-500/20"   },
+        ].map(({ to, Icon, title, sub, grad, border }) => (
+          <Link key={to} to={to} className={`group flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-br ${grad} border ${border} hover:scale-[1.02] transition-all duration-300`}>
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition">
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-white truncate">{title}</p>
+              <p className="text-xs text-white/50 truncate">{sub}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 ml-auto flex-shrink-0 transition" />
+          </Link>
+        ))}
       </div>
     </div>
   );
