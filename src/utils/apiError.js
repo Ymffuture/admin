@@ -4,7 +4,7 @@
  *   - a plain string:       { detail: "Not found" }
  *   - a validation array:   { detail: [{loc:[...], msg:"...", type:"..."}] }
  */
-export function parseApiError(err) {
+export default function parseApiError(err) {
   const status = err?.response?.status;
   const detail = err?.response?.data?.detail;
 
