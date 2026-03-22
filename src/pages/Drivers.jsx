@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPendingDrivers, getAllDrivers, approveDriver } from "../api/drivers.api";
-import { parseApiError } from "../utils/apiError";
+import parseApiError from "../utils/apiError";
 import {
   Bike, CheckCircle2, XCircle, Clock, User, Phone, Car,
   MapPin, FileText, RefreshCw, AlertCircle, Filter, Eye,
