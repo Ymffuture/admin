@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { getOrders, updateOrderStatus } from "../api/orders.api";
-import { parseApiError } from "../api/drivers.api";
+import { parseApiError } from "../utils/apiError";
 import OrderTable from "../components/OrderTable";
 import {
   LayoutDashboard, ShoppingBag, RefreshCw, TrendingUp,
