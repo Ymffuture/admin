@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPendingDrivers, getAllDrivers, approveDriver } from "../api/drivers.api";
+import { getPendingDrivers, getAllDrivers, approveDriver, parseApiError } from "../api/drivers.api";
 import {
   Bike, CheckCircle2, XCircle, Clock, User, Phone, Car,
   MapPin, FileText, RefreshCw, AlertCircle, Filter, Eye,
@@ -175,7 +175,7 @@ export default function Drivers() {
       showToast("Driver approved! They can now log in and go online.");
       load();
     } catch (err) {
-      showToast(err?.response?.data?.detail || "Approval failed", "error");
+      showToast(parseApiError(err), "error");
     } finally {
       setActionId(null);
     }
@@ -189,7 +189,7 @@ export default function Drivers() {
       showToast("Driver application rejected.");
       load();
     } catch (err) {
-      showToast(err?.response?.data?.detail || "Rejection failed", "error");
+      showToast(parseApiError(err), "error");
     } finally {
       setActionId(null);
     }
