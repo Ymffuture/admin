@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPendingDrivers, getAllDrivers, approveDriver } from "../api/drivers.api";
-import  parseApiError  from "../utils/apiError";
+import { parseApiError } from "../utils/apiError";
 import {
   Bike, CheckCircle2, XCircle, Clock, User, Phone, Car,
   MapPin, FileText, RefreshCw, AlertCircle, Filter, Eye,
@@ -140,12 +140,13 @@ function DriverCard({ driver, onApprove, onReject, actionId }) {
 }
 
 export default function Drivers() {
-  const [drivers, setDrivers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
-  const [filter, setFilter]   = useState("pending");
-  const [actionId, setActionId] = useState(null);
-  const [toast, setToast]     = useState(null);
+  const [drivers, setDrivers]      = useState([]);
+  const [onlineDrivers, setOnline] = useState([]);
+  const [loading, setLoading]      = useState(true);
+  const [error, setError]          = useState(null);
+  const [filter, setFilter]        = useState("pending");
+  const [actionId, setActionId]    = useState(null);
+  const [toast, setToast]          = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -156,12 +157,16 @@ export default function Drivers() {
     setLoading(true);
     setError(null);
     try {
-      const res = filter === "pending"
-        ? await getPendingDrivers()
-        : await getAllDrivers(filter === "all" ? null : filter);
-      setDrivers(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      setError(err?.response?.data?.detail || err.message || "Failed to load drivers");
+      const [mainRes, allRes] = await Promise.allSettled([
+        filter === "pending" ? getPendingDrivers() : getAllDrivers(filter === "all" ? null : filter),
+        getAllDrivers("approved"),
+      ]);
+      if (mainRes.status === "fulfilled") setDrivers(Array.isArray(mainRes.value.data) ? mainRes.value.data : []);
+      else setError(mainRes.reason?.response?.data?.detail || mainRes.reason?.message || "Failed to load drivers");
+      if (allRes.status === "fulfilled") {
+        const all = Array.isArray(allRes.value.data) ? allRes.value.data : [];
+        setOnline(all.filter(d => d.is_available));
+      }
     } finally {
       setLoading(false);
     }
@@ -225,6 +230,50 @@ export default function Drivers() {
           Refresh
         </button>
       </div>
+
+      {/* Online Drivers Panel */}
+      {onlineDrivers.length > 0 && (
+        <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            </span>
+            <h2 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">
+              {onlineDrivers.length} Driver{onlineDrivers.length !== 1 ? "s" : ""} Online Now
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {onlineDrivers.map(d => (
+              <div key={d.id} className="flex items-center gap-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
+                {d.profile_photo_url ? (
+                  <img src={d.profile_photo_url} alt={d.full_name} className="w-8 h-8 rounded-full object-cover border border-emerald-500/30" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                    {d.full_name?.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="text-white text-xs font-bold leading-none">{d.full_name}</p>
+                  <p className="text-emerald-400 text-[10px] mt-0.5 capitalize">{d.vehicle_type} · ⭐ {d.rating?.toFixed(1)}</p>
+                </div>
+                {d.current_order_id ? (
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400 text-[10px] font-bold">On delivery</span>
+                ) : (
+                  <span className="ml-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold">Waiting</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {onlineDrivers.length === 0 && !loading && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/8 text-sm text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-slate-600 flex-shrink-0" />
+          No drivers currently online
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
