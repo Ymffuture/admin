@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { getOrders, updateOrderStatus, parseApiError } from "../api/orders.api";
+import { getOrders, updateOrderStatus, getOrder} from "../api/orders.api";
+import parseApiError from "../utils/apiError" ;
 import {
   ShoppingBag, RefreshCw, TrendingUp, DollarSign,
   Clock, AlertCircle, CheckCircle, ChevronDown,
