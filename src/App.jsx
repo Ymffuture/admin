@@ -4,11 +4,13 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 
-const Dashboard   = lazy(() => import("./pages/Dashboard"));
-const Orders      = lazy(() => import("./pages/Orders"));
-const MenuManager = lazy(() => import("./pages/MenuManager"));
-const Analytics   = lazy(() => import("./pages/Analytics"));
-const Drivers     = lazy(() => import("./pages/Drivers"));
+const Dashboard     = lazy(() => import("./pages/Dashboard"));
+const Orders        = lazy(() => import("./pages/Orders"));
+const MenuManager   = lazy(() => import("./pages/MenuManager"));
+const Analytics     = lazy(() => import("./pages/Analytics"));
+const Drivers       = lazy(() => import("./pages/Drivers"));
+const Users         = lazy(() => import("./pages/Users"));          // ← NEW
+const Notifications = lazy(() => import("./pages/Notifications"));  // ← NEW
 
 function PageLoader() {
   return (
@@ -39,11 +41,13 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route path="/"          element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
-        <Route path="/orders"    element={<ProtectedLayout><Orders /></ProtectedLayout>} />
-        <Route path="/menu"      element={<ProtectedLayout><MenuManager /></ProtectedLayout>} />
-        <Route path="/analytics" element={<ProtectedLayout><Analytics /></ProtectedLayout>} />
-        <Route path="/drivers"   element={<ProtectedLayout><Drivers /></ProtectedLayout>} />
+        <Route path="/"               element={<ProtectedLayout><Dashboard     /></ProtectedLayout>} />
+        <Route path="/orders"         element={<ProtectedLayout><Orders         /></ProtectedLayout>} />
+        <Route path="/menu"           element={<ProtectedLayout><MenuManager    /></ProtectedLayout>} />
+        <Route path="/analytics"      element={<ProtectedLayout><Analytics      /></ProtectedLayout>} />
+        <Route path="/drivers"        element={<ProtectedLayout><Drivers        /></ProtectedLayout>} />
+        <Route path="/users"          element={<ProtectedLayout><Users          /></ProtectedLayout>} />   {/* ← NEW */}
+        <Route path="/notifications"  element={<ProtectedLayout><Notifications  /></ProtectedLayout>} />   {/* ← NEW */}
 
         {/* Catch-all → login */}
         <Route path="*" element={<Login />} />
