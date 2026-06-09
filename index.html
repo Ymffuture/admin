@@ -1,27 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Social Media Downloader</title>
-    <script type="text/javascript">
-      (function (c, l, a, r, i, t, y) {
-        c[a] =
-          c[a] ||
-          function () {
-            (c[a].q = c[a].q || []).push(arguments);
-          };
-        t = l.createElement(r);
-        t.async = 1;
-        t.src = "https://www.clarity.ms/tag/" + i;
-        y = l.getElementsByTagName(r)[0];
-        y.parentNode.insertBefore(t, y);
-      })(window, document, "clarity", "script", "rv61d21r2n");
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Viewport -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  />
+
+  <!-- Title -->
+  <title>KotaBites Admin Dashboard</title>
+
+  <!-- SEO -->
+  <meta
+    name="description"
+    content="KotaBites Admin Dashboard - Manage orders, customers, drivers, products, analytics, and business operations."
+  />
+
+  <meta
+    name="keywords"
+    content="KotaBites, Admin Dashboard, Food Delivery, Orders, Restaurant Management"
+  />
+
+  <meta name="author" content="KotaBites" />
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#ff6b00" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="KotaBites Admin Dashboard" />
+  <meta
+    property="og:description"
+    content="Manage your food delivery platform with powerful admin tools."
+  />
+  <meta property="og:image" content="/logo.png" />
+  <meta property="og:type" content="website" />
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "rv61d21r2n");
+  </script>
+</head>
+
+<body>
+  <noscript>
+    You need to enable JavaScript to run this application.
+  </noscript>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <style>
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        z-index: 9999;
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+      }
+    </style>
+    Loading Admin Dashboard...
+  </div>
+
+  <!-- React Root -->
+  <div id="root"></div>
+
+  <script type="module" src="/src/main.jsx"></script>
+
+  <script>
+    window.addEventListener("load", () => {
+      const loader = document.getElementById("loading-screen");
+      if (loader) loader.remove();
+    });
+  </script>
+</body>
 </html>
