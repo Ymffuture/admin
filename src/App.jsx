@@ -15,11 +15,28 @@ const Notifications = lazy(() => import("./pages/Notifications"));  // ← NEW
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-white/10 border-t-indigo-500 rounded-full animate-spin" />
-        <p className="text-slate-500 text-sm">Loading…</p>
-      </div>
+  <div className="flex flex-col items-center gap-4">
+
+    {/* Spinner */}
+    <div className="relative w-10 h-10">
+      <div className="absolute inset-0 rounded-full border-2 border-slate-200/20" />
+      <div className="absolute inset-0 rounded-full border-2 border-t-indigo-500 border-r-indigo-400/60 border-b-transparent border-l-transparent animate-spin" />
     </div>
+
+    {/* Text */}
+    <div className="flex items-center gap-2 text-sm text-slate-500">
+      <span>Loading</span>
+
+      {/* Animated dots */}
+      <span className="flex gap-1">
+        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
+        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
+      </span>
+    </div>
+
+  </div>
+</div>
   );
 }
 
