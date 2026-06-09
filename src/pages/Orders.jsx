@@ -5,6 +5,7 @@ import {
   ShoppingBag, RefreshCw, TrendingUp, DollarSign,
   Clock, AlertCircle, CheckCircle, ChevronDown,
   MapPin, Phone, CreditCard, Banknote, Package,
+  Check, X
 } from "lucide-react";
 
 // ── Toast ─────────────────────────────────────────────────────────────────
@@ -29,7 +30,14 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 // ── Status options & colours ──────────────────────────────────────────────
-const STATUSES = ["pending","paid","preparing","ready","delivered","cancelled"];
+const STATUSES = [
+  { value: "pending",   label: "Pending",   color: "#d97706", bg: "#fffbeb", desc: "Order received, awaiting payment" },
+  { value: "paid",      label: "Paid",      color: "#2563eb", bg: "#eff6ff", desc: "Payment confirmed" },
+  { value: "preparing", label: "Preparing", color: "#ea580c", bg: "#fff7ed", desc: "Kitchen is preparing the order" },
+  { value: "ready",     label: "Ready",     color: "#7c3aed", bg: "#f5f3ff", desc: "Order is ready for pickup/delivery" },
+  { value: "delivered", label: "Delivered", color: "#059669", bg: "#ecfdf5", desc: "Order has been delivered" },
+  { value: "cancelled", label: "Cancelled", color: "#e11d48", bg: "#fff1f2", desc: "Order was cancelled" },
+];
 
 const STATUS_COLOR = {
   pending:   "bg-amber-500/15 text-amber-400 border-amber-500/30",
@@ -40,61 +48,201 @@ const STATUS_COLOR = {
   cancelled: "bg-red-500/15 text-red-400 border-red-500/30",
 };
 
-// ── Inline status selector ────────────────────────────────────────────────
+// ── ChatGPT-Style Status Modal ───────────────────────────────────────────
 function StatusSelect({ orderId, current, onChange, disabled }) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [tempValue, setTempValue] = useState(current);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const modalRef = useRef(null);
+  const triggerRef = useRef(null);
 
-  const select = async (s) => {
-    if (s === current) { setOpen(false); return; }
+  const currentStatus = STATUSES.find((s) => s.value === current) || STATUSES[0];
+
+  useEffect(() => {
+    setTempValue(current);
+  }, [current]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target) &&
+          triggerRef.current && !triggerRef.current.contains(e.target)) {
+        setIsOpen(false);
+        setTempValue(current);
+      }
+    };
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setTempValue(current);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEsc);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [isOpen, current]);
+
+  const handleConfirm = async () => {
+    if (tempValue === current) {
+      setIsOpen(false);
+      return;
+    }
     setBusy(true);
     setFailed(false);
     try {
-      await onChange(orderId, s);
+      await onChange(orderId, tempValue);
+      setIsOpen(false);
     } catch {
       setFailed(true);
       setTimeout(() => setFailed(false), 3000);
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setTempValue(current);
+    setIsOpen(false);
   };
 
   return (
-    <div className="relative">
+    <div className="relative inline-block">
+      {/* Trigger Button */}
       <button
-        onClick={() => !busy && !disabled && setOpen(v => !v)}
-        disabled={busy || disabled}
+        ref={triggerRef}
+        onClick={() => !disabled && setIsOpen(true)}
+        disabled={disabled || busy}
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold capitalize transition
           ${failed
             ? "bg-red-500/20 text-red-400 border-red-500/40 ring-1 ring-red-500/40"
             : STATUS_COLOR[current] || "bg-slate-700/30 text-slate-400 border-slate-600/30"}
-          ${busy ? "opacity-50 cursor-not-allowed" : "hover:opacity-80 cursor-pointer"}`}
+          ${busy || disabled ? "opacity-50 cursor-not-allowed" : "hover:opacity-80 cursor-pointer"}`}
       >
         {busy ? "Saving…" : failed ? "Failed — retry" : current}
         {!busy && !failed && <ChevronDown className="w-3 h-3 opacity-60" />}
       </button>
 
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-1 z-20 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[160px]">
-            <p className="px-3 pt-2.5 pb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Set Status</p>
-            {STATUSES.map(s => (
+      {/* ChatGPT-Style Modal Overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={handleCancel}
+          />
+
+          {/* Modal Card */}
+          <div
+            ref={modalRef}
+            className="relative w-full max-w-sm mx-4 rounded-2xl shadow-2xl border overflow-hidden"
+            style={{
+              backgroundColor: "#1e293b",
+              borderColor: "rgba(255,255,255,0.08)",
+              animation: "modalIn 0.2s ease-out",
+            }}
+          >
+            {/* Header */}
+            <div className="px-5 pt-5 pb-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">
+                  Update Order Status
+                </h3>
+                <button
+                  onClick={handleCancel}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-sm text-slate-400 mt-1">
+                Select a new status for this order.
+              </p>
+            </div>
+
+            {/* Status Options */}
+            <div className="px-3 pb-2">
+              <div className="space-y-1">
+                {STATUSES.map((status) => {
+                  const isSelected = tempValue === status.value;
+                  return (
+                    <button
+                      key={status.value}
+                      onClick={() => setTempValue(status.value)}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150 group ${
+                        isSelected
+                          ? "bg-white/10 border border-white/10"
+                          : "hover:bg-white/5 border border-transparent"
+                      }`}
+                    >
+                      {/* Status Dot */}
+                      <span
+                        className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-offset-2 transition-all"
+                        style={{
+                          backgroundColor: status.color,
+                          ringColor: isSelected ? status.color : "transparent",
+                          ringOffsetColor: "#1e293b",
+                        }}
+                      />
+
+                      {/* Label & Description */}
+                      <div className="flex-1 min-w-0">
+                        <span
+                          className="block text-sm font-semibold"
+                          style={{ color: status.color }}
+                        >
+                          {status.label}
+                        </span>
+                        <span className="block text-xs text-slate-500 mt-0.5">
+                          {status.desc}
+                        </span>
+                      </div>
+
+                      {/* Checkmark */}
+                      {isSelected && (
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: status.color }}
+                        >
+                          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-5 py-4 flex items-center justify-end gap-2"
+              style={{ backgroundColor: "rgba(255,255,255,0.03)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
               <button
-                key={s}
-                onClick={() => select(s)}
-                className={`w-full text-left px-4 py-2.5 text-xs font-bold capitalize transition flex items-center justify-between
-                  ${s === current ? "bg-white/10" : "hover:bg-white/5"}
-                  ${STATUS_COLOR[s]?.split(" ")[1] || "text-slate-300"}`}
+                onClick={handleCancel}
+                className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               >
-                {s}
-                {s === "ready" && <span className="text-[9px] font-bold text-purple-400/70 uppercase tracking-wider">→ Driver</span>}
-                {s === current && <span className="text-[10px] opacity-50">current</span>}
+                Cancel
               </button>
-            ))}
+              <button
+                onClick={handleConfirm}
+                disabled={tempValue === current || busy}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                  tempValue === current || busy
+                    ? "bg-slate-700 text-slate-500 cursor-not-allowed"
+                    : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm hover:shadow"
+                }`}
+              >
+                {busy && (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                )}
+                {busy ? "Updating…" : "Update Status"}
+              </button>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -377,7 +525,7 @@ export default function Orders() {
               className="flex-1 min-w-[200px] bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-white/25"
             />
             <div className="flex gap-2 flex-wrap">
-              {["all", ...STATUSES].map(s => (
+              {["all", ...STATUSES.map(s => s.value)].map(s => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
@@ -566,6 +714,20 @@ export default function Orders() {
         )}
 
       </div>
+
+      {/* Modal animation styles */}
+      <style>{`
+        @keyframes modalIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
