@@ -1,1 +1,115 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="shieldGradient" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#41D1FF"/>
+      <stop offset="100%" stop-color="#BD34FE"/>
+    </linearGradient>
+
+    <linearGradient id="chefGradient" x1="0" y1="0" x2="200" y2="200">
+      <stop offset="0%" stop-color="#FFE066"/>
+      <stop offset="100%" stop-color="#FFA500"/>
+    </linearGradient>
+
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Shield -->
+  <path
+    d="M256 40L430 95V250C430 360 356 451 256 480C156 451 82 360 82 250V95L256 40Z"
+    fill="url(#shieldGradient)"
+    filter="url(#shadow)"
+  />
+
+  <!-- Fork -->
+  <g transform="translate(120 140)">
+    <rect x="0" y="40" width="12" height="110" rx="6" fill="#FFD54F"/>
+    <rect x="-10" y="0" width="8" height="45" rx="4" fill="#FFD54F"/>
+    <rect x="2" y="0" width="8" height="45" rx="4" fill="#FFD54F"/>
+    <rect x="14" y="0" width="8" height="45" rx="4" fill="#FFD54F"/>
+    <rect x="26" y="0" width="8" height="45" rx="4" fill="#FFD54F"/>
+  </g>
+
+  <!-- Spatula -->
+  <g transform="translate(360 140)">
+    <rect x="-6" y="40" width="12" height="110" rx="6" fill="#FFD54F"/>
+    <rect x="-24" y="0" width="48" height="40" rx="8" fill="#FFD54F"/>
+    <line x1="-12" y1="8" x2="-12" y2="32" stroke="#7A3E00" stroke-width="4"/>
+    <line x1="0" y1="8" x2="0" y2="32" stroke="#7A3E00" stroke-width="4"/>
+    <line x1="12" y1="8" x2="12" y2="32" stroke="#7A3E00" stroke-width="4"/>
+  </g>
+
+  <!-- Chef Hat -->
+  <g transform="translate(156 120)">
+    <path
+      d="M80 50C60 15 110 -10 140 20C160 -10 220 0 220 50C250 50 260 100 220 110H80C40 100 50 50 80 50Z"
+      fill="url(#chefGradient)"
+      stroke="#FFF"
+      stroke-width="6"
+    />
+    <rect
+      x="90"
+      y="100"
+      width="120"
+      height="45"
+      rx="10"
+      fill="#FFC107"
+      stroke="#FFF"
+      stroke-width="4"
+    />
+  </g>
+
+  <!-- Clipboard -->
+  <g transform="translate(300 250)">
+    <rect
+      width="90"
+      height="120"
+      rx="10"
+      fill="#FFF"
+      stroke="#D1D5DB"
+      stroke-width="3"
+    />
+    <rect
+      x="25"
+      y="-12"
+      width="40"
+      height="20"
+      rx="5"
+      fill="#FFB300"
+    />
+
+    <path d="M18 35L26 43L40 25" stroke="#22C55E" stroke-width="5" fill="none"/>
+    <path d="M18 65L26 73L40 55" stroke="#22C55E" stroke-width="5" fill="none"/>
+    <path d="M18 95L26 103L40 85" stroke="#22C55E" stroke-width="5" fill="none"/>
+
+    <line x1="50" y1="35" x2="75" y2="35" stroke="#94A3B8" stroke-width="4"/>
+    <line x1="50" y1="65" x2="75" y2="65" stroke="#94A3B8" stroke-width="4"/>
+    <line x1="50" y1="95" x2="75" y2="95" stroke="#94A3B8" stroke-width="4"/>
+  </g>
+
+  <!-- Text -->
+  <text
+    x="256"
+    y="435"
+    text-anchor="middle"
+    fill="white"
+    font-size="42"
+    font-family="Arial, sans-serif"
+    font-weight="700">
+    ADMIN
+  </text>
+
+  <text
+    x="256"
+    y="470"
+    text-anchor="middle"
+    fill="#FFD54F"
+    font-size="24"
+    font-family="Arial, sans-serif"
+    font-weight="600">
+    FOOD APP
+  </text>
+
+</svg>
