@@ -1,3 +1,4 @@
+// src/App.jsx  (admin panel)
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Login from "./pages/Login";
@@ -9,36 +10,28 @@ const Orders        = lazy(() => import("./pages/Orders"));
 const MenuManager   = lazy(() => import("./pages/MenuManager"));
 const Analytics     = lazy(() => import("./pages/Analytics"));
 const Drivers       = lazy(() => import("./pages/Drivers"));
-const Users         = lazy(() => import("./pages/Users"));          // ← NEW
-const Notifications = lazy(() => import("./pages/Notifications"));  // ← NEW
-import AdminAppeals from "./pages/AdminAppeals";
-
+const Users         = lazy(() => import("./pages/Users"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const AdminAppeals  = lazy(() => import("./pages/AdminAppeals")); // ← lazy + no more bare import
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-  <div className="flex flex-col items-center gap-4">
-
-    {/* Spinner */}
-    <div className="relative w-10 h-10">
-      <div className="absolute inset-0 rounded-full border-2 border-slate-200/20" />
-      <div className="absolute inset-0 rounded-full border-2 border-t-indigo-500 border-r-indigo-400/60 border-b-transparent border-l-transparent animate-spin" />
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-2 border-slate-200/20" />
+          <div className="absolute inset-0 rounded-full border-2 border-t-indigo-500 border-r-indigo-400/60 border-b-transparent border-l-transparent animate-spin" />
+        </div>
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Loading</span>
+          <span className="flex gap-1">
+            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
+            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
+          </span>
+        </div>
+      </div>
     </div>
-
-    {/* Text */}
-    <div className="flex items-center gap-2 text-sm text-slate-500">
-      <span>Loading</span>
-
-      {/* Animated dots */}
-      <span className="flex gap-1">
-        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
-        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
-        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
-      </span>
-    </div>
-
-  </div>
-</div>
   );
 }
 
@@ -60,14 +53,17 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route path="/"               element={<ProtectedLayout><Dashboard     /></ProtectedLayout>} />
-        <Route path="/orders"         element={<ProtectedLayout><Orders         /></ProtectedLayout>} />
-        <Route path="/menu"           element={<ProtectedLayout><MenuManager    /></ProtectedLayout>} />
-        <Route path="/analytics"      element={<ProtectedLayout><Analytics      /></ProtectedLayout>} />
-        <Route path="/drivers"        element={<ProtectedLayout><Drivers        /></ProtectedLayout>} />
-        <Route path="/users"          element={<ProtectedLayout><Users          /></ProtectedLayout>} />   {/* ← NEW */}
-        <Route path="/notifications"  element={<ProtectedLayout><Notifications  /></ProtectedLayout>} />   {/* ← NEW */}
-<Route path="/appeals" element={<AdminAppeals />} />
+        <Route path="/"              element={<ProtectedLayout><Dashboard    /></ProtectedLayout>} />
+        <Route path="/orders"        element={<ProtectedLayout><Orders        /></ProtectedLayout>} />
+        <Route path="/menu"          element={<ProtectedLayout><MenuManager   /></ProtectedLayout>} />
+        <Route path="/analytics"     element={<ProtectedLayout><Analytics     /></ProtectedLayout>} />
+        <Route path="/drivers"       element={<ProtectedLayout><Drivers       /></ProtectedLayout>} />
+        <Route path="/users"         element={<ProtectedLayout><Users         /></ProtectedLayout>} />
+        <Route path="/notifications" element={<ProtectedLayout><Notifications /></ProtectedLayout>} />
+
+        {/* ✅ FIX: wrapped in ProtectedLayout — was bare element before */}
+        <Route path="/appeals"       element={<ProtectedLayout><AdminAppeals  /></ProtectedLayout>} />
+
         {/* Catch-all → login */}
         <Route path="*" element={<Login />} />
       </Routes>
