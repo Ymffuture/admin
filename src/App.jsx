@@ -11,6 +11,8 @@ const Analytics     = lazy(() => import("./pages/Analytics"));
 const Drivers       = lazy(() => import("./pages/Drivers"));
 const Users         = lazy(() => import("./pages/Users"));          // ← NEW
 const Notifications = lazy(() => import("./pages/Notifications"));  // ← NEW
+import AdminAppeals from "./pages/AdminAppeals";
+
 
 function PageLoader() {
   return (
@@ -65,7 +67,7 @@ export default function App() {
         <Route path="/drivers"        element={<ProtectedLayout><Drivers        /></ProtectedLayout>} />
         <Route path="/users"          element={<ProtectedLayout><Users          /></ProtectedLayout>} />   {/* ← NEW */}
         <Route path="/notifications"  element={<ProtectedLayout><Notifications  /></ProtectedLayout>} />   {/* ← NEW */}
-
+<Route path="/appeals" element={<AdminAppeals />} />
         {/* Catch-all → login */}
         <Route path="*" element={<Login />} />
       </Routes>
