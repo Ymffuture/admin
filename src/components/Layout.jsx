@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import useAdminAuth from "../hooks/useAdminAuth";
 import {
   LayoutDashboard, ClipboardList, UtensilsCrossed,
-  BarChart3, Bike, LogOut, Sparkles, Menu,
+  BarChart3, Bike,Scale, LogOut, Sparkles, Menu,
   ChevronRight, Users, Bell,
 } from "lucide-react";
 import { useState } from "react";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/users",          icon: Users,           label: "Users"         },  // ← NEW
   { to: "/notifications",  icon: Bell,            label: "Notifications" },  // ← NEW
   { to: "/analytics",      icon: BarChart3,       label: "Analytics"     },
+  { to: "/appeals", icon: Scale, label: "Appeals" },
 ];
 
 export default function Layout({ children }) {
