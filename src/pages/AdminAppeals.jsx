@@ -6,7 +6,7 @@ import {
   ChevronUp, Search, RefreshCw, AlertTriangle, User,
   ShieldOff, Lock, Filter,
 } from "lucide-react";
-import axiosClient from "../api/axiosClient";
+import { api } from "../api/auth.api"; // ✅ FIX: admin panel uses api, not axiosClient
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -115,7 +115,7 @@ function ReviewModal({ appeal, onClose, onDone }) {
     setLoading(true);
     setError("");
     try {
-      await axiosClient.post(`/appeals/${appeal.id}/review`, {
+      await api.post(`/appeals/${appeal.id}/review`, {
         decision,
         admin_note: note.trim() || null,
       });
@@ -368,7 +368,7 @@ export default function AdminAppeals() {
     setLoading(true);
     try {
       const params = statusFilter && statusFilter !== "all" ? `?status=${statusFilter}` : "";
-      const { data } = await axiosClient.get(`/appeals/${params}`);
+      const { data } = await api.get(`/appeals/${params}`);
       setAppeals(data);
     } catch (err) {
       console.error("Failed to load appeals", err);
