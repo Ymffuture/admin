@@ -159,15 +159,16 @@ export default function NotificationsPage() {
     setAiLoading(true);
     try {
       const res = await getAiMenuRecommendation();
-      const text =
-        res.data?.reply ||
-        res.data?.message ||
-        res.data?.recommendation ||
-        "Check out today's chef picks — fresh, hot, and ready to order! 🍕";
-      const title = "Today's Pick For You 🍕";
+      const title = res.data?.title || "Today's Pick For You 🍕";
+      const text = res.data?.message || "Check out today's chef picks — fresh, hot, and ready to order! 🍕";
+      const aiGenerated = res.data?.ai_generated !== false; // undefined → treat as AI-generated
       const secondsTotal = AI_RECOMMEND_DELAY_MS / 1000;
 
-      setAiPending({ title, message: text, secondsLeft: secondsTotal });
+      setAiPending({ title, message: text, secondsLeft: secondsTotal, aiGenerated });
+
+      if (!aiGenerated) {
+        showToast("AI model unavailable right now — using a fallback pick instead", "warning");
+      }
 
       aiIntervalRef.current = setInterval(() => {
         setAiPending((p) => (p ? { ...p, secondsLeft: Math.max(0, p.secondsLeft - 1) } : p));
@@ -353,7 +354,16 @@ export default function NotificationsPage() {
               ) : (
                 <div className="space-y-3">
                   <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/25">
-                    <p className="text-xs font-bold text-violet-300 mb-1">{aiPending.title}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs font-bold text-violet-300 flex-1">{aiPending.title}</p>
+                      {aiPending.aiGenerated ? (
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[9px] font-bold">
+                          <Sparkles className="w-2.5 h-2.5" />AI
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-[9px] font-bold">Fallback</span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{aiPending.message}</p>
                   </div>
                   <div className="flex items-center justify-between gap-3">
