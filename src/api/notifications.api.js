@@ -20,6 +20,15 @@ export const deactivateNotification = (id) =>
 export const deleteNotification = (id) =>
   api.delete(`/notifications/${id}`);
 
+// ── AI ────────────────────────────────────────────────────────────────────
+
+/**
+ * Ask KotaBot AI (backend `/ai/recommendations`) for a short menu
+ * recommendation blurb, used to auto-compose a "today's pick" notification.
+ */
+export const getAiMenuRecommendation = () =>
+  api.get("/ai/recommendations");
+
 // ── User (customer-facing) ────────────────────────────────────────────────
 
 /** Get all active notifications relevant to the current user. */

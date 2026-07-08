@@ -33,3 +33,9 @@ export const deleteWarning = (userId, warningIndex) =>
 // ── Delete ────────────────────────────────────────────────────────────────
 export const deleteUser = (userId) =>
   api.delete(`/admin/users/${userId}`);
+
+// ── Subscription ──────────────────────────────────────────────────────────
+// Admin-forced cancellation of a user's active ProBite subscription — bypasses
+// the normal end-of-billing-cycle flow and revokes access immediately.
+export const forceCancelSubscription = (userId, reason) =>
+  api.post(`/admin/users/${userId}/subscription/force-cancel`, { reason });
