@@ -23,11 +23,16 @@ export const deleteNotification = (id) =>
 // ── AI ────────────────────────────────────────────────────────────────────
 
 /**
- * Ask KotaBot AI (backend `/ai/recommendations`) for a short menu
- * recommendation blurb, used to auto-compose a "today's pick" notification.
+ * Ask KotaBot AI for a broadcast-ready "today's pick" menu recommendation
+ * (backend `/ai/admin/menu-recommendation`) — an admin-only endpoint that
+ * always calls the model against store-wide popularity, independent of any
+ * one user's order history. (The customer-facing `/ai/recommendations`
+ * endpoint personalizes per-user and skips the AI call entirely when the
+ * calling account has no delivered orders — which is every admin account —
+ * so it isn't usable here.)
  */
 export const getAiMenuRecommendation = () =>
-  api.get("/ai/recommendations");
+  api.get("/ai/admin/menu-recommendation");
 
 // ── User (customer-facing) ────────────────────────────────────────────────
 
