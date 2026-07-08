@@ -4,13 +4,14 @@ import {
   suspendUser, unsuspendUser,
   banUser, unbanUser,
   warnUser, deleteWarning, deleteUser,
+  forceCancelSubscription,
 } from "../api/users.api";
 import parseApiError from "../utils/apiError";
 import {
   Users, Search, RefreshCw, AlertCircle, CheckCircle2,
   Shield, ShieldOff, ShieldAlert, AlertTriangle, Trash2,
   ChevronDown, ChevronUp, Phone, Mail, Clock, Star,
-  X, Loader2, Eye, UserX, BadgeAlert, Lock,
+  X, Loader2, Eye, UserX, BadgeAlert, Lock, CreditCard, Ban,
 } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -31,6 +32,16 @@ const NOTIF_TYPE_COLORS = {
   update:      "bg-violet-500/15 text-violet-400 border-violet-500/25",
   urgent:      "bg-red-500/15 text-red-400 border-red-500/25",
 };
+
+// Backend field shape for subscription status isn't fully pinned down from
+// this repo alone, so check the couple of shapes it's realistically sent as.
+const isProBiteUser = (user) =>
+  !!(
+    user?.is_probite ||
+    user?.plan === "probite" ||
+    user?.subscription_plan === "probite" ||
+    (user?.subscription && (user.subscription.plan === "probite" || user.subscription.active))
+  );
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
@@ -278,6 +289,52 @@ function DeleteModal({ user, onClose, onSuccess, showToast }) {
   );
 }
 
+// ── Cancel subscription modal ────────────────────────────────────────────
+
+function CancelSubscriptionModal({ user, onClose, onSuccess, showToast }) {
+  const [reason, setReason] = useState("");
+  const [busy, setBusy]     = useState(false);
+
+  const submit = async () => {
+    if (!reason.trim()) return;
+    setBusy(true);
+    try {
+      await forceCancelSubscription(user.id, reason.trim());
+      showToast(`${user.full_name}'s ProBite subscription was force-cancelled`, "success");
+      onSuccess();
+      onClose();
+    } catch (e) { showToast(parseApiError(e), "error"); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <Modal title={`Cancel Subscription — ${user.full_name}`} icon={CreditCard} iconColor="text-rose-400" onClose={onClose}>
+      <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm mb-4 flex items-start gap-2">
+        <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        This <strong>immediately revokes</strong> ProBite access, bypassing the normal end-of-billing-cycle cancellation. It does not automatically refund any payment already taken.
+      </div>
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reason *</label>
+          <input
+            className="mt-1.5 w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-rose-500/50 focus:outline-none"
+            placeholder="e.g. Chargeback / policy violation"
+            value={reason} onChange={e => setReason(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 pt-1">
+          <button onClick={submit} disabled={!reason.trim() || busy}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold transition disabled:opacity-40">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
+            Force Cancel Subscription
+          </button>
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white text-sm transition">Keep it</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 // ── User row ───────────────────────────────────────────────────────────────
 
 function UserRow({ user, onAction, isEven }) {
@@ -315,7 +372,16 @@ function UserRow({ user, onAction, isEven }) {
         </td>
 
         {/* Status */}
-        <td className="px-4 py-3.5"><StatusBadge user={user} /></td>
+        <td className="px-4 py-3.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <StatusBadge user={user} />
+            {isProBiteUser(user) && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
+                <CreditCard className="w-3 h-3" />ProBite
+              </span>
+            )}
+          </div>
+        </td>
 
         {/* Warnings */}
         <td className="px-4 py-3.5">
@@ -377,6 +443,13 @@ function UserRow({ user, onAction, isEven }) {
                   <UserX className="w-4 h-4" />
                 </button>
               )
+            )}
+            {/* Force cancel subscription */}
+            {!user.is_admin && isProBiteUser(user) && (
+              <button onClick={() => onAction("cancelSub", user)}
+                className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition" title="Force Cancel Subscription">
+                <CreditCard className="w-4 h-4" />
+              </button>
             )}
             {/* Delete */}
             {!user.is_admin && (
@@ -522,6 +595,7 @@ export default function UsersPage() {
       {modal?.type === "suspend" && <SuspendModal user={modal.user} onClose={() => setModal(null)} onSuccess={load} showToast={showToast} />}
       {modal?.type === "ban"     && <BanModal     user={modal.user} onClose={() => setModal(null)} onSuccess={load} showToast={showToast} />}
       {modal?.type === "delete"  && <DeleteModal  user={modal.user} onClose={() => setModal(null)} onSuccess={load} showToast={showToast} />}
+      {modal?.type === "cancelSub" && <CancelSubscriptionModal user={modal.user} onClose={() => setModal(null)} onSuccess={load} showToast={showToast} />}
 
       <div className="max-w-7xl mx-auto space-y-6">
 

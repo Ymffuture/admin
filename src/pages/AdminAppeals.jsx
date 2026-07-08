@@ -118,6 +118,10 @@ function ReviewModal({ appeal, onClose, onDone }) {
       await api.post(`/appeals/${appeal.id}/review`, {
         decision,
         admin_note: note.trim() || null,
+        // Approving an appeal means the restriction was wrong/resolved —
+        // tell the backend to fully clear the account's ban/suspension/
+        // warning state, not just flip the appeal's own status.
+        clear_restrictions: decision === "approved",
       });
       onDone(appeal.id, decision);
       onClose();
@@ -217,8 +221,9 @@ function ReviewModal({ appeal, onClose, onDone }) {
             <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-xs text-emerald-400">
               <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
               <span>
-                Approving will automatically lift the{" "}
-                <strong>{appeal.account_status_at_time}</strong> status and restore the user's access.
+                Approving clears <strong>everything</strong> tied to this restriction — the{" "}
+                <strong>{appeal.account_status_at_time}</strong> status, any ban/suspension reason, and the
+                account's warning history — and fully restores access.
               </span>
             </div>
           )}
@@ -379,10 +384,24 @@ export default function AdminAppeals() {
 
   useEffect(() => { load(tab); }, [tab, load]);
 
-  // Update row in-place after review
+  // Update row in-place after review. Approval clears EVERYTHING tied to the
+  // restriction — not just the appeal's own status — so the row doesn't keep
+  // showing a stale "Banned"/"Suspended" badge or leftover ban reason once
+  // the backend has actually lifted it.
   const handleDone = (id, decision) => {
     setAppeals(prev =>
-      prev.map(a => a.id === id ? { ...a, status: decision } : a)
+      prev.map(a => {
+        if (a.id !== id) return a;
+        if (decision === "approved") {
+          return {
+            ...a,
+            status: decision,
+            account_status_at_time: "active",
+            reviewed_at: new Date().toISOString(),
+          };
+        }
+        return { ...a, status: decision, reviewed_at: new Date().toISOString() };
+      })
     );
   };
 

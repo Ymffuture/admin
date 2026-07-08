@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   createNotification,
   adminGetNotifications,
   deactivateNotification,
   deleteNotification,
+  getAiMenuRecommendation,
 } from "../api/notifications.api";
 import parseApiError from "../utils/apiError";
 import {
   Bell, Send, Trash2, RefreshCw, AlertCircle,
   CheckCircle2, Info, AlertTriangle, Wrench,
   Tag, Zap, Radio, Users, User as UserIcon,
-  Eye, EyeOff, Clock, X, Loader2,
+  Eye, EyeOff, Clock, X, Loader2, Sparkles, Ban,
 } from "lucide-react";
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ const TYPE_MAP = Object.fromEntries(NOTIF_TYPES.map(t => [t.value, t]));
 
 function Toast({ message, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 5000); return () => clearTimeout(t); }, [onClose]);
-  const bg = { success: "bg-emerald-600", error: "bg-rose-600" }[type] || "bg-slate-700";
+  const bg = { success: "bg-emerald-600", error: "bg-rose-600", warning: "bg-amber-600" }[type] || "bg-slate-700";
   return (
     <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl text-white text-sm font-semibold ${bg} max-w-sm`}>
       {type === "error" ? <AlertCircle className="w-4 h-4 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 flex-shrink-0" />}
@@ -134,6 +135,73 @@ export default function NotificationsPage() {
   const [toast,         setToast]         = useState(null);
   const [form,          setForm]          = useState(DEFAULT_FORM);
   const [activeOnly,    setActiveOnly]    = useState(false);
+
+  // ── AI auto-recommendation — generates a KotaBot menu pick, then fires
+  //    it as a broadcast notification automatically after a 2-minute delay ──
+  const AI_RECOMMEND_DELAY_MS = 2 * 60 * 1000;
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiPending, setAiPending] = useState(null); // { title, message, secondsLeft }
+  const aiTimeoutRef  = useRef(null);
+  const aiIntervalRef = useRef(null);
+
+  const clearAiSchedule = () => {
+    clearTimeout(aiTimeoutRef.current);
+    clearInterval(aiIntervalRef.current);
+    aiTimeoutRef.current = null;
+    aiIntervalRef.current = null;
+    setAiPending(null);
+  };
+
+  // Cancel any in-flight schedule if the admin navigates away mid-countdown
+  useEffect(() => () => clearAiSchedule(), []);
+
+  const scheduleAiRecommendation = async () => {
+    setAiLoading(true);
+    try {
+      const res = await getAiMenuRecommendation();
+      const text =
+        res.data?.reply ||
+        res.data?.message ||
+        res.data?.recommendation ||
+        "Check out today's chef picks — fresh, hot, and ready to order! 🍕";
+      const title = "Today's Pick For You 🍕";
+      const secondsTotal = AI_RECOMMEND_DELAY_MS / 1000;
+
+      setAiPending({ title, message: text, secondsLeft: secondsTotal });
+
+      aiIntervalRef.current = setInterval(() => {
+        setAiPending((p) => (p ? { ...p, secondsLeft: Math.max(0, p.secondsLeft - 1) } : p));
+      }, 1000);
+
+      aiTimeoutRef.current = setTimeout(async () => {
+        clearInterval(aiIntervalRef.current);
+        aiIntervalRef.current = null;
+        try {
+          await createNotification({
+            title, message: text, type: "promo", target: "all", expires_days: 7,
+          });
+          showToast("AI menu recommendation sent to all users 🤖🍕");
+          load();
+        } catch (e) {
+          showToast(parseApiError(e), "error");
+        } finally {
+          setAiPending(null);
+          aiTimeoutRef.current = null;
+        }
+      }, AI_RECOMMEND_DELAY_MS);
+    } catch (e) {
+      showToast(parseApiError(e), "error");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const cancelAiSchedule = () => {
+    clearAiSchedule();
+    showToast("AI recommendation cancelled", "warning");
+  };
+
+  const fmtCountdown = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   const showToast = useCallback((msg, type = "success") => {
     setToast({ msg, type, id: Date.now() });
@@ -261,8 +329,51 @@ export default function NotificationsPage() {
         <div className="grid lg:grid-cols-5 gap-6">
 
           {/* ── Compose panel ── */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 sticky top-20 space-y-5">
+          <div className="lg:col-span-2 space-y-4">
+
+            {/* AI auto-recommendation card */}
+            <div className="bg-white/[0.02] border border-violet-500/20 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-violet-400" />
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">AI Menu Recommendation</h2>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                KotaBot picks a trending menu item and drafts a short blurb. It auto-sends to
+                <strong className="text-slate-300"> all users</strong> after a 2-minute delay, giving you time to cancel.
+              </p>
+
+              {!aiPending ? (
+                <button
+                  onClick={scheduleAiRecommendation}
+                  disabled={aiLoading}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-600/20 border border-violet-500/30 hover:bg-violet-600/30 text-violet-300 text-sm font-bold transition disabled:opacity-40"
+                >
+                  {aiLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Generating…</> : <><Sparkles className="w-4 h-4" />Generate &amp; Schedule</>}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/25">
+                    <p className="text-xs font-bold text-violet-300 mb-1">{aiPending.title}</p>
+                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{aiPending.message}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-violet-300">
+                      <Clock className="w-3.5 h-3.5 animate-pulse" />
+                      Sending in {fmtCountdown(aiPending.secondsLeft)}
+                    </div>
+                    <button
+                      onClick={cancelAiSchedule}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/25 text-slate-400 text-xs font-bold transition"
+                    >
+                      <Ban className="w-3.5 h-3.5" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 space-y-5">
               <div className="flex items-center gap-2">
                 <Send className="w-4 h-4 text-violet-400" />
                 <h2 className="text-sm font-bold text-white uppercase tracking-wider">Compose Notification</h2>
